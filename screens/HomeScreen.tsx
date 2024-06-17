@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {StyleSheet, Text, View, Button} from 'react-native';
+import {StyleSheet, Text, View, Button, SafeAreaView} from 'react-native';
 import {StackScreenProps, RootScreenProps} from './StackScreen';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import SimonGame from '../components/SimonGame';
@@ -29,11 +29,11 @@ const HomeScreen = ({navigation}: NavProps) => {
     //   <Button onPress={handleModalNavPressed} title="Open Modal" />
     // </View>
 
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* <ScoreBoard score={score} />
       <GameBoard onScoreUpdate={handleScoreUpdate} /> */}
       <SimonGame />
-    </View>
+    </SafeAreaView>
   );
 };
 
