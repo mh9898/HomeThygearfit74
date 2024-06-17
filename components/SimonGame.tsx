@@ -1,50 +1,30 @@
-import React, {useState, useRef, useEffect} from 'react';
+import React, {useRef, useEffect} from 'react';
+import {View, TouchableOpacity, Text, StyleSheet} from 'react-native';
+import {useDispatch, useSelector} from 'react-redux';
+import {RootState} from '../store/store';
 import {
-  View,
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  Dimensions,
-} from 'react-native';
-import GameBtn from './GameBtn_Ref';
+  resetGame,
+  addNewColor,
+  startGame,
+  setPlayingIdx,
+} from '../store/gameSlice';
+import GameBtn from './GameBtn';
 
-const colors = ['green', 'red', 'yellow', 'blue'];
-const windowWidth = Dimensions.get('window').width;
-const windowHeight = Dimensions.get('window').height;
+const SimonGame: React.FC = () => {
+  const dispatch = useDispatch();
+  const sequence = useSelector((state: RootState) => state.game.sequence);
+  const playing = useSelector((state: RootState) => state.game.playing);
+  const playingIdx = useSelector((state: RootState) => state.game.playingIdx);
 
-const SimonGame_Ref: React.FC = () => {
-  // states
-  const [sequence, setSequence] = useState<string[]>([]);
-  const [playing, setPlaying] = useState(false);
-  const [playingIdx, setPlayingIdx] = useState(0);
-
-  // refs
   const greenRef = useRef<TouchableOpacity>(null);
   const redRef = useRef<TouchableOpacity>(null);
   const yellowRef = useRef<TouchableOpacity>(null);
   const blueRef = useRef<TouchableOpacity>(null);
 
-  // functions
-  const resetGame = () => {
-    setSequence([]);
-    setPlaying(false);
-    setPlayingIdx(0);
-  };
-
-  //step 2: add new color to sequence
-  const addNewColor = () => {
-    //select a random color
-    const color = colors[Math.floor(Math.random() * 4)];
-    //add the color to the sequence
-    const newSequence = [...sequence, color];
-    setSequence(newSequence);
-  };
-
-  //step 1: show sequence
   const handleNextLevel = () => {
     if (!playing) {
-      setPlaying(true);
-      addNewColor();
+      dispatch(startGame());
+      dispatch(addNewColor());
     }
   };
 
@@ -59,20 +39,17 @@ const SimonGame_Ref: React.FC = () => {
           if (ref.current) {
             ref.current.setNativeProps({style: {opacity: 1}});
 
-            // check if the clicked color matches the sequence
             if (sequence[playingIdx] === color) {
-              // clicked the last color of the sequence
               if (playingIdx === sequence.length - 1) {
                 setTimeout(() => {
-                  setPlayingIdx(0);
-                  addNewColor();
+                  dispatch(setPlayingIdx(0));
+                  dispatch(addNewColor());
                 }, 250);
-                //missed the last color of the sequence
               } else {
-                setPlayingIdx(playingIdx + 1);
+                dispatch(setPlayingIdx(playingIdx + 1));
               }
             } else {
-              resetGame();
+              dispatch(resetGame());
             }
           }
         }, 250);
@@ -80,9 +57,7 @@ const SimonGame_Ref: React.FC = () => {
     }
   };
 
-  //step 3: highlight sequence
   useEffect(() => {
-    // show sequence
     if (sequence.length > 0) {
       const showSequence = (idx = 0) => {
         let ref: React.RefObject<TouchableOpacity> | null = null;
@@ -105,7 +80,6 @@ const SimonGame_Ref: React.FC = () => {
             break;
         }
 
-        // highlight the ref
         if (ref && ref.current) {
           setTimeout(() => {
             if (ref.current) {
@@ -128,47 +102,32 @@ const SimonGame_Ref: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {/* Green and red container */}
       <View style={styles.row}>
         <GameBtn
-          style={{
-            borderTopLeftRadius: 50,
-          }}
           color="green"
-          onPress={() => handleColorClick('green', greenRef)}
+          onPress={color => handleColorClick(color, greenRef)}
           ref={greenRef}
         />
         <GameBtn
           color="red"
-          style={{
-            borderTopRightRadius: 50,
-          }}
-          onPress={() => handleColorClick('red', redRef)}
+          onPress={color => handleColorClick(color, redRef)}
           ref={redRef}
         />
       </View>
 
-      {/* Yellow and blue container */}
       <View style={styles.row}>
         <GameBtn
           color="yellow"
-          style={{
-            borderBottomLeftRadius: 50,
-          }}
-          onPress={() => handleColorClick('yellow', yellowRef)}
+          onPress={color => handleColorClick(color, yellowRef)}
           ref={yellowRef}
         />
         <GameBtn
           color="blue"
-          style={{
-            borderBottomRightRadius: 50,
-          }}
-          onPress={() => handleColorClick('blue', blueRef)}
+          onPress={color => handleColorClick(color, blueRef)}
           ref={blueRef}
         />
       </View>
 
-      {/* Play button */}
       <TouchableOpacity style={styles.playButton} onPress={handleNextLevel}>
         <Text style={styles.playButtonText}>
           {sequence.length === 0 ? 'Play' : sequence.length}
@@ -183,7 +142,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    // backgroundColor: '#1f2937',
+    backgroundColor: '#1f2937',
   },
   row: {
     flexDirection: 'row',
@@ -191,11 +150,11 @@ const styles = StyleSheet.create({
   },
   playButton: {
     position: 'absolute',
-    top: windowHeight / 2 - 100,
-    backgroundColor: 'rgba(52, 52, 52, 0.95)',
+    bottom: 30,
+    backgroundColor: '#111827',
     borderRadius: 100,
-    width: 120,
-    height: 120,
+    width: 150,
+    height: 150,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 5,
@@ -207,4 +166,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SimonGame_Ref;
+export default SimonGame;
