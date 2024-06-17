@@ -5,15 +5,17 @@ import {createStackNavigator} from '@react-navigation/stack';
 import HomeScreen from './HomeScreen';
 import DetailsScreen from './DetailsScreen';
 import ModalScreen from './ModalScreen';
+import GameOverModal from './GameOverModal';
 
 export type StackScreenProps = {
   HomeScreen: undefined;
   DetailsScreen: {score: string};
+  GameOverModal: undefined;
 };
 
 export type RootScreenProps = {
   Main: undefined;
-  ModalScreen: {score: string};
+  GameOverModal: {score: string};
 };
 
 const MainStack = createStackNavigator<StackScreenProps>();
@@ -22,7 +24,7 @@ const RootStack = createStackNavigator<RootScreenProps>();
 const MainStackScreen = () => {
   return (
     <MainStack.Navigator>
-      <MainStack.Screen name="HomeScreen" component={HomeScreen} />
+      <MainStack.Screen name="GameOverModal" component={GameOverModal} />
       <MainStack.Screen name="DetailsScreen" component={DetailsScreen} />
     </MainStack.Navigator>
   );
@@ -37,8 +39,8 @@ const RootStackScreen = () => {
         options={{headerShown: false}}
       />
       <RootStack.Screen
-        name="ModalScreen"
-        component={ModalScreen}
+        name="GameOverModal"
+        component={GameOverModal}
         options={{headerShown: false}}
       />
     </RootStack.Navigator>

@@ -3,11 +3,11 @@ import {TouchableOpacity, StyleSheet, Text, ViewStyle} from 'react-native';
 
 type GameBtnProps = {
   color: string;
-  onPress: () => void;
+  onPress: (color: string) => void;
   style?: ViewStyle;
 };
 
-const GameBtn_Ref = forwardRef<TouchableOpacity, GameBtnProps>(
+const GameBtn = forwardRef<TouchableOpacity, GameBtnProps>(
   ({color, onPress, style}, ref) => {
     const backgroundColor = {
       green: '#22c55e',
@@ -19,7 +19,7 @@ const GameBtn_Ref = forwardRef<TouchableOpacity, GameBtnProps>(
     return (
       <TouchableOpacity
         ref={ref}
-        onPress={onPress}
+        onPress={() => onPress(color)}
         style={[styles.button, {backgroundColor}, style]}>
         <Text style={styles.text}>{color}</Text>
       </TouchableOpacity>
@@ -29,12 +29,12 @@ const GameBtn_Ref = forwardRef<TouchableOpacity, GameBtnProps>(
 
 const styles = StyleSheet.create({
   button: {
-    width: 140,
-    height: 140,
+    width: 100,
+    height: 100,
     justifyContent: 'center',
     alignItems: 'center',
     margin: 10,
-    borderRadius: 90,
+    borderRadius: 50,
   },
   text: {
     color: 'white',
@@ -42,4 +42,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default GameBtn_Ref;
+export default GameBtn;
