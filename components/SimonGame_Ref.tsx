@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
   },
   playButton: {
     position: 'absolute',
-    top: windowHeight / 2 - 120,
+    top: windowHeight / 2 - 100,
     backgroundColor: 'rgba(52, 52, 52, 0.95)',
     borderRadius: 100,
     width: 120,
