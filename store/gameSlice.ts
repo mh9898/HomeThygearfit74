@@ -1,15 +1,24 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
+interface LeaderboardEntry {
+  name: string;
+  score: number;
+}
+
 interface GameState {
   sequence: string[];
   playing: boolean;
   playingIdx: number;
+  score: number;
+  leaderboard: LeaderboardEntry[];
 }
 
 const initialState: GameState = {
   sequence: [],
   playing: false,
   playingIdx: 0,
+  score: 0,
+  leaderboard: [],
 };
 
 const gameSlice = createSlice({
@@ -20,6 +29,8 @@ const gameSlice = createSlice({
       state.sequence = [];
       state.playing = false;
       state.playingIdx = 0;
+      state.score = 0;
+      // state.leaderboard = [];
     },
     addNewColor(state) {
       const colors = ['green', 'red', 'yellow', 'blue'];
@@ -32,9 +43,21 @@ const gameSlice = createSlice({
     setPlayingIdx(state, action: PayloadAction<number>) {
       state.playingIdx = action.payload;
     },
+    incrementScore(state) {
+      state.score += 1;
+    },
+    addLeaderboardEntry(state, action: PayloadAction<LeaderboardEntry>) {
+      state.leaderboard.push(action.payload);
+    },
   },
 });
 
-export const {resetGame, addNewColor, startGame, setPlayingIdx} =
-  gameSlice.actions;
+export const {
+  resetGame,
+  addNewColor,
+  startGame,
+  setPlayingIdx,
+  incrementScore,
+  addLeaderboardEntry,
+} = gameSlice.actions;
 export default gameSlice.reducer;

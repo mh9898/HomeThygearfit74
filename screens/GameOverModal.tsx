@@ -6,19 +6,32 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {StackScreenProps, RootScreenProps} from './StackScreen';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {useDispatch, useSelector} from 'react-redux';
+import {addLeaderboardEntry} from '../store/gameSlice';
+import {RootState} from '../store/store';
 
-const GameOverModal: React.FC = () => {
+type NavProps = NativeStackScreenProps<StackScreenProps, 'GameOverModal'>;
+
+const GameOverModal = ({navigation}: NavProps) => {
   const [name, setName] = useState('');
-  const navigation = useNavigation();
+  const dispatch = useDispatch();
+  //   const leaderboard = useSelector((state: RootState) => state.game.leaderboard);
+  const score = useSelector((state: RootState) => state.game.score);
 
   const handleRestart = () => {
-    navigation.navigate('SimonGame');
+    // if (name) {
+
+    // }
+    dispatch(addLeaderboardEntry({name, score}));
+    navigation.navigate('DetailsScreen');
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Game Over</Text>
+      <Text style={styles.title}>{score}</Text>
       <TextInput
         style={styles.input}
         placeholder="Enter your name"
@@ -26,7 +39,7 @@ const GameOverModal: React.FC = () => {
         onChangeText={setName}
       />
       <TouchableOpacity style={styles.button} onPress={handleRestart}>
-        <Text style={styles.buttonText}>Restart Game</Text>
+        <Text style={styles.buttonText}>Save</Text>
       </TouchableOpacity>
     </View>
   );

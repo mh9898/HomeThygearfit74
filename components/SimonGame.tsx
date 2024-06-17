@@ -7,14 +7,19 @@ import {
   addNewColor,
   startGame,
   setPlayingIdx,
+  incrementScore,
+  addLeaderboardEntry,
 } from '../store/gameSlice';
 import GameBtn from './GameBtn';
+import {useNavigation} from '@react-navigation/native';
 
 const SimonGame: React.FC = () => {
   const dispatch = useDispatch();
+  const navigation = useNavigation();
   const sequence = useSelector((state: RootState) => state.game.sequence);
   const playing = useSelector((state: RootState) => state.game.playing);
   const playingIdx = useSelector((state: RootState) => state.game.playingIdx);
+  const score = useSelector((state: RootState) => state.game.score);
 
   const greenRef = useRef<TouchableOpacity>(null);
   const redRef = useRef<TouchableOpacity>(null);
@@ -44,12 +49,13 @@ const SimonGame: React.FC = () => {
                 setTimeout(() => {
                   dispatch(setPlayingIdx(0));
                   dispatch(addNewColor());
+                  dispatch(incrementScore());
                 }, 250);
               } else {
                 dispatch(setPlayingIdx(playingIdx + 1));
               }
             } else {
-              dispatch(resetGame());
+              navigation.navigate('GameOverModal');
             }
           }
         }, 250);
