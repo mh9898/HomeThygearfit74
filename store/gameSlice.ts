@@ -30,7 +30,6 @@ const gameSlice = createSlice({
       state.playing = false;
       state.playingIdx = 0;
       state.score = 0;
-      // state.leaderboard = [];
     },
     addNewColor(state) {
       const colors = ['green', 'red', 'yellow', 'blue'];
@@ -48,6 +47,10 @@ const gameSlice = createSlice({
     },
     addLeaderboardEntry(state, action: PayloadAction<LeaderboardEntry>) {
       state.leaderboard.push(action.payload);
+      state.leaderboard.sort((a, b) => b.score - a.score);
+      if (state.leaderboard.length > 10) {
+        state.leaderboard.pop();
+      }
     },
   },
 });

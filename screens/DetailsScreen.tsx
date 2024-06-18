@@ -12,12 +12,11 @@ import {StackScreenProps} from './StackScreen';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootState} from '../store/store';
 import {useDispatch, useSelector} from 'react-redux';
-import {resetGame, addLeaderboardEntry} from '../store/gameSlice';
+import {resetGame} from '../store/gameSlice';
 
 type NavProps = NativeStackScreenProps<StackScreenProps, 'DetailsScreen'>;
 
 const DetailsScreen = ({navigation}: NavProps) => {
-  const score = useSelector((state: RootState) => state.game.score);
   const dispatch = useDispatch();
   const leaderboard = useSelector((state: RootState) => state.game.leaderboard);
 
