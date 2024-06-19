@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -8,32 +8,71 @@ import {
   FlatList,
   Keyboard,
 } from 'react-native';
-import {StackScreenProps, RootScreenProps} from './StackScreen';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {useDispatch, useSelector} from 'react-redux';
 import {addLeaderboardEntry, resetGame} from '../store/gameSlice';
 import {RootState} from '../store/store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-type NavProps = NativeStackScreenProps<StackScreenProps, 'GameOverModal'>;
+type LeaderboardEntry = {
+  name: string;
+  score: number;
+};
 
-const GameOverModal = ({navigation}: NavProps) => {
+type RootStackParamList = {
+  HomeScreen: undefined;
+  GameOverModal: undefined;
+};
+
+type NavProps = NativeStackScreenProps<RootStackParamList, 'GameOverModal'>;
+
+const GameOverModal: React.FC<NavProps> = ({navigation}) => {
   const [name, setName] = useState('');
-  const [isSavedDisabled, setIsSavedDisabled] = useState(true);
+  const [isSaved, setIsSaved] = useState(false);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const dispatch = useDispatch();
-  const leaderboard = useSelector((state: RootState) => state.game.leaderboard);
   const score = useSelector((state: RootState) => state.game.score);
 
-  const saveScore = () => {
-    // if (name) {
+  useEffect(() => {
+    const loadLeaderboard = async () => {
+      try {
+        const leaderboardAsyncStorage = await AsyncStorage.getItem(
+          'leaderboard',
+        );
+        if (leaderboardAsyncStorage) {
+          setLeaderboard(JSON.parse(leaderboardAsyncStorage));
+        }
+      } catch (error) {
+        console.log('Error loading leaderboard:', error);
+      }
+    };
 
-    // }
+    loadLeaderboard();
+  }, []);
+
+  const savePlayerScoreInLeaderboard = () => {
+    if (!name) {
+      return; // Ensure name is provided
+    }
     dispatch(addLeaderboardEntry({name, score}));
-    setIsSavedDisabled(false);
+    setIsSaved(true);
     Keyboard.dismiss();
   };
 
-  const playAgain = () => {
+  const playAgain = async () => {
     dispatch(resetGame());
+
+    const updatedLeaderboard = [...leaderboard, {name, score}];
+    try {
+      await AsyncStorage.setItem(
+        'leaderboard',
+        JSON.stringify(updatedLeaderboard),
+      );
+      setLeaderboard(updatedLeaderboard);
+    } catch (error) {
+      console.log('Error saving leaderboard:', error);
+    }
+
     navigation.navigate('HomeScreen');
   };
 
@@ -56,13 +95,15 @@ const GameOverModal = ({navigation}: NavProps) => {
         />
 
         <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
-          {isSavedDisabled ? (
-            <TouchableOpacity style={styles.button} onPress={saveScore}>
-              <Text style={styles.buttonText}>Save</Text>
-            </TouchableOpacity>
-          ) : (
+          {isSaved ? (
             <TouchableOpacity style={styles.button} onPress={playAgain}>
               <Text style={styles.buttonText}>Play again</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={styles.button}
+              onPress={savePlayerScoreInLeaderboard}>
+              <Text style={styles.buttonText}>Save</Text>
             </TouchableOpacity>
           )}
         </View>
