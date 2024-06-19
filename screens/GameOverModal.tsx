@@ -28,38 +28,30 @@ type NavProps = NativeStackScreenProps<RootStackParamList, 'GameOverModal'>;
 
 const GameOverModal: React.FC<NavProps> = ({navigation}) => {
   const [name, setName] = useState('');
-  const [isSaved, setIsSaved] = useState(false);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const dispatch = useDispatch();
   const score = useSelector((state: RootState) => state.game.score);
 
   useEffect(() => {
-    const loadLeaderboard = async () => {
-      try {
-        const leaderboardAsyncStorage = await AsyncStorage.getItem(
-          'leaderboard',
-        );
-        if (leaderboardAsyncStorage) {
-          setLeaderboard(JSON.parse(leaderboardAsyncStorage));
-        }
-      } catch (error) {
-        console.log('Error loading leaderboard:', error);
-      }
-    };
-
     loadLeaderboard();
   }, []);
 
-  const savePlayerScoreInLeaderboard = () => {
-    if (!name) {
-      return; // Ensure name is provided
+  const loadLeaderboard = async () => {
+    try {
+      const leaderboardAsyncStorage = await AsyncStorage.getItem('leaderboard');
+      if (leaderboardAsyncStorage) {
+        setLeaderboard(JSON.parse(leaderboardAsyncStorage));
+      }
+    } catch (error) {
+      console.log('Error loading leaderboard:', error);
     }
-    dispatch(addLeaderboardEntry({name, score}));
-    setIsSaved(true);
-    Keyboard.dismiss();
   };
 
   const playAgain = async () => {
+    dispatch(addLeaderboardEntry({name, score}));
+    loadLeaderboard();
+    Keyboard.dismiss();
+
     dispatch(resetGame());
 
     const updatedLeaderboard = [...leaderboard, {name, score}];
@@ -95,17 +87,9 @@ const GameOverModal: React.FC<NavProps> = ({navigation}) => {
         />
 
         <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
-          {isSaved ? (
-            <TouchableOpacity style={styles.button} onPress={playAgain}>
-              <Text style={styles.buttonText}>Play again</Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              style={styles.button}
-              onPress={savePlayerScoreInLeaderboard}>
-              <Text style={styles.buttonText}>Save</Text>
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity style={styles.button} onPress={playAgain}>
+            <Text style={styles.buttonText}>Play again</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -125,12 +109,12 @@ const GameOverModal: React.FC<NavProps> = ({navigation}) => {
               backgroundColor: '#935438',
               padding: 10,
             }}>
+            <Text style={styles.leaderboardTextTitle}>Top 10's</Text>
             <View
               style={{
                 flexDirection: 'row',
                 justifyContent: 'space-around',
               }}>
-              <Text style={styles.leaderboardTextTitle}>Top 10's</Text>
               {name.length > 0 && (
                 <Text style={styles.leaderboardText}> Player Name: {name}</Text>
               )}
