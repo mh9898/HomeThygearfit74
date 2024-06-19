@@ -9,13 +9,13 @@ import GameOverModal from './GameOverModal';
 
 export type StackScreenProps = {
   HomeScreen: undefined;
-  DetailsScreen: {score: string};
+  DetailsScreen: {score: string; name: string};
   GameOverModal: undefined;
 };
 
 export type RootScreenProps = {
   Main: undefined;
-  GameOverModal: {score: string};
+  GameOverModal: undefined;
 };
 
 const MainStack = createStackNavigator<StackScreenProps>();
@@ -24,7 +24,7 @@ const RootStack = createStackNavigator<RootScreenProps>();
 const MainStackScreen = () => {
   return (
     <MainStack.Navigator>
-      <MainStack.Screen name="GameOverModal" component={GameOverModal} />
+      <MainStack.Screen name="HomeScreen" component={HomeScreen} />
       <MainStack.Screen name="DetailsScreen" component={DetailsScreen} />
     </MainStack.Navigator>
   );
