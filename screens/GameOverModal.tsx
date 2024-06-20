@@ -7,6 +7,8 @@ import {
   StyleSheet,
   FlatList,
   Keyboard,
+  Modal,
+  Alert,
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {useDispatch, useSelector} from 'react-redux';
@@ -27,6 +29,7 @@ type RootStackParamList = {
 type NavProps = NativeStackScreenProps<RootStackParamList, 'GameOverModal'>;
 
 const GameOverModal: React.FC<NavProps> = ({navigation}) => {
+  const [modalVisible, setModalVisible] = useState(false);
   const [name, setName] = useState('');
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const dispatch = useDispatch();
@@ -48,81 +51,93 @@ const GameOverModal: React.FC<NavProps> = ({navigation}) => {
   };
 
   const playAgain = async () => {
-    dispatch(addLeaderboardEntry({name, score}));
-    loadLeaderboard();
-    Keyboard.dismiss();
-
-    dispatch(resetGame());
-
     const updatedLeaderboard = [...leaderboard, {name, score}];
+    updatedLeaderboard.sort((a, b) => b.score - a.score);
+    const top10Leaderboard = updatedLeaderboard.slice(0, 10); // Limit to top 10
+
     try {
       await AsyncStorage.setItem(
         'leaderboard',
-        JSON.stringify(updatedLeaderboard),
+        JSON.stringify(top10Leaderboard),
       );
-      setLeaderboard(updatedLeaderboard);
+      setLeaderboard(top10Leaderboard);
     } catch (error) {
       console.log('Error saving leaderboard:', error);
     }
 
+    dispatch(addLeaderboardEntry({name, score}));
+    dispatch(resetGame());
+    Keyboard.dismiss();
     navigation.navigate('HomeScreen');
   };
 
   return (
     <>
-      <View
-        style={{
-          backgroundColor: '#2c3e50',
-          padding: 10,
-          justifyContent: 'center',
-          alignItems: 'center',
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={true}
+        onRequestClose={() => {
+          Alert.alert('Modal has been closed.');
+          setModalVisible(!modalVisible);
         }}>
-        <Text style={styles.title}>Game Over</Text>
-        <Text style={styles.title}>Your Score: {score}</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your name"
-          value={name}
-          onChangeText={setName}
-        />
+        <View
+          style={{
+            backgroundColor: '#2c3e50',
+            padding: 10,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <Text style={styles.title}>Game Over</Text>
+          <Text style={styles.title}>Your Score: {score}</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your name"
+            value={name}
+            onChangeText={setName}
+          />
 
-        <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
-          <TouchableOpacity style={styles.button} onPress={playAgain}>
-            <Text style={styles.buttonText}>Play again</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <FlatList
-        style={{backgroundColor: 'tomato', flexDirection: 'column', flex: 1}}
-        data={leaderboard}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({item}) => (
-          <View style={styles.leaderboardItem}>
-            <Text style={styles.leaderboardText}>{item.name}</Text>
-            <Text style={styles.leaderboardText}>Score = {item.score}</Text>
+          <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
+            <TouchableOpacity style={styles.button} onPress={playAgain}>
+              <Text style={styles.buttonText}>Play again</Text>
+            </TouchableOpacity>
           </View>
-        )}
-        ListHeaderComponent={
-          <View
-            style={{
-              backgroundColor: '#935438',
-              padding: 10,
-            }}>
-            <Text style={styles.leaderboardTextTitle}>Top 10's</Text>
+        </View>
+
+        <FlatList
+          style={{backgroundColor: 'tomato', flexDirection: 'column', flex: 1}}
+          data={leaderboard}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({item}) => (
+            <View style={styles.leaderboardItem}>
+              <Text style={styles.leaderboardText}>{item.name}</Text>
+              <Text style={styles.leaderboardText}>Score = {item.score}</Text>
+            </View>
+          )}
+          ListHeaderComponent={
             <View
               style={{
-                flexDirection: 'row',
-                justifyContent: 'space-around',
+                backgroundColor: '#935438',
+                padding: 10,
               }}>
-              {name.length > 0 && (
-                <Text style={styles.leaderboardText}> Player Name: {name}</Text>
-              )}
-              <Text style={styles.leaderboardText}> Score: {score}</Text>
+              <Text style={styles.leaderboardTextTitle}>Top 10's</Text>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-around',
+                }}>
+                {name.length > 0 && (
+                  <Text style={styles.leaderboardText}>
+                    {' '}
+                    Player Name: {name}
+                  </Text>
+                )}
+                <Text style={styles.leaderboardText}> Score: {score}</Text>
+              </View>
             </View>
-          </View>
-        }
-      />
+          }
+        />
+      </Modal>
     </>
   );
 };

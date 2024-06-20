@@ -1,10 +1,10 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import Sound from 'react-native-sound';
 
 interface LeaderboardEntry {
   name: string;
   score: number;
 }
-
 interface GameState {
   sequence: string[];
   playing: boolean;
@@ -21,6 +21,13 @@ const initialState: GameState = {
   leaderboard: [],
 };
 
+const sounds: {[key: string]: Sound} = {
+  green: new Sound('green.mp3', Sound.MAIN_BUNDLE),
+  red: new Sound('red.mp3', Sound.MAIN_BUNDLE),
+  yellow: new Sound('yellow.mp3', Sound.MAIN_BUNDLE),
+  blue: new Sound('blue.mp3', Sound.MAIN_BUNDLE),
+};
+
 const gameSlice = createSlice({
   name: 'game',
   initialState,
@@ -35,6 +42,17 @@ const gameSlice = createSlice({
       const colors = ['green', 'red', 'yellow', 'blue'];
       const color = colors[Math.floor(Math.random() * 4)];
       state.sequence.push(color);
+
+      // Play sequence of colors Sound
+      state.sequence.forEach((color, index) => {
+        setTimeout(() => {
+          sounds[color].play(success => {
+            if (!success) {
+              console.log(`Failed to play the ${color} sound`);
+            }
+          });
+        }, index * 500); // Adjust delay as needed
+      });
     },
     startGame(state) {
       state.playing = true;
@@ -45,8 +63,10 @@ const gameSlice = createSlice({
     incrementScore(state) {
       state.score += 1;
     },
+
     addLeaderboardEntry(state, action: PayloadAction<LeaderboardEntry>) {
-      state.leaderboard.push(action.payload);
+      const {name, score} = action.payload;
+      state.leaderboard.push({name, score});
       state.leaderboard.sort((a, b) => b.score - a.score);
       if (state.leaderboard.length > 10) {
         state.leaderboard.pop();

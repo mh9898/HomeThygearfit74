@@ -1,17 +1,19 @@
 import React, {useRef, useEffect} from 'react';
 import {View, TouchableOpacity, Text, StyleSheet} from 'react-native';
+
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../store/store';
 import {
-  resetGame,
   addNewColor,
   startGame,
   setPlayingIdx,
   incrementScore,
-  addLeaderboardEntry,
 } from '../store/gameSlice';
+
 import GameBtn from './GameBtn';
 import {useNavigation} from '@react-navigation/native';
+
+import Sound from 'react-native-sound';
 
 const SimonGame: React.FC = () => {
   const dispatch = useDispatch();
@@ -19,53 +21,29 @@ const SimonGame: React.FC = () => {
   const sequence = useSelector((state: RootState) => state.game.sequence);
   const playing = useSelector((state: RootState) => state.game.playing);
   const playingIdx = useSelector((state: RootState) => state.game.playingIdx);
-  const score = useSelector((state: RootState) => state.game.score);
 
   const greenRef = useRef<TouchableOpacity>(null);
   const redRef = useRef<TouchableOpacity>(null);
   const yellowRef = useRef<TouchableOpacity>(null);
   const blueRef = useRef<TouchableOpacity>(null);
 
-  const handleNextLevel = () => {
-    if (!playing) {
-      dispatch(startGame());
-      dispatch(addNewColor());
-    }
-  };
-
-  const handleColorClick = (
-    color: string,
-    ref: React.RefObject<TouchableOpacity>,
-  ) => {
-    if (playing) {
-      if (ref.current) {
-        ref.current.setNativeProps({style: {opacity: 0.5}});
-        setTimeout(() => {
-          if (ref.current) {
-            ref.current.setNativeProps({style: {opacity: 1}});
-
-            if (sequence[playingIdx] === color) {
-              if (playingIdx === sequence.length - 1) {
-                setTimeout(() => {
-                  dispatch(setPlayingIdx(0));
-                  dispatch(addNewColor());
-                  dispatch(incrementScore());
-                }, 250);
-              } else {
-                dispatch(setPlayingIdx(playingIdx + 1));
-              }
-            } else {
-              navigation.navigate('GameOverModal');
-            }
-          }
-        }, 250);
-      }
-    }
+  // Define type for sounds object
+  const sounds: {[key: string]: Sound} = {
+    green: new Sound('green.mp3', Sound.MAIN_BUNDLE),
+    red: new Sound('red.mp3', Sound.MAIN_BUNDLE),
+    yellow: new Sound('yellow.mp3', Sound.MAIN_BUNDLE),
+    blue: new Sound('blue.mp3', Sound.MAIN_BUNDLE),
   };
 
   useEffect(() => {
     if (sequence.length > 0) {
-      const showSequence = (idx = 0) => {
+      // Load sounds
+      Object.keys(sounds).forEach(key => {
+        sounds[key].isLoaded;
+      });
+      Sound.setCategory('Playback');
+
+      const showSequence = async (idx = 0) => {
         let ref: React.RefObject<TouchableOpacity> | null = null;
 
         switch (sequence[idx]) {
@@ -105,6 +83,52 @@ const SimonGame: React.FC = () => {
       showSequence();
     }
   }, [sequence]);
+
+  const playColorSound = (color: string) => {
+    sounds[color].play(success => {
+      if (!success) {
+        console.log(`Failed to play the ${color} sound`);
+      }
+    });
+  };
+
+  const handleNextLevel = () => {
+    if (!playing) {
+      dispatch(startGame());
+      dispatch(addNewColor());
+    }
+  };
+
+  const handleColorClick = (
+    color: string,
+    ref: React.RefObject<TouchableOpacity>,
+  ) => {
+    if (playing) {
+      playColorSound(color);
+      if (ref.current) {
+        ref.current.setNativeProps({style: {opacity: 0.5}});
+        setTimeout(() => {
+          if (ref.current) {
+            ref.current.setNativeProps({style: {opacity: 1}});
+
+            if (sequence[playingIdx] === color) {
+              if (playingIdx === sequence.length - 1) {
+                setTimeout(() => {
+                  dispatch(setPlayingIdx(0));
+                  dispatch(addNewColor());
+                  dispatch(incrementScore());
+                }, 250);
+              } else {
+                dispatch(setPlayingIdx(playingIdx + 1));
+              }
+            } else {
+              navigation.navigate('GameOverModal');
+            }
+          }
+        }, 250);
+      }
+    }
+  };
 
   return (
     <View style={styles.container}>
