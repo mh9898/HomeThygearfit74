@@ -34,6 +34,7 @@ const GameOverModal: React.FC<NavProps> = ({navigation}) => {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const dispatch = useDispatch();
   const score = useSelector((state: RootState) => state.game.score);
+  const [isDoneKeyboardPressed, setIsDoneKeyboardPressed] = useState(false);
 
   useEffect(() => {
     loadLeaderboard();
@@ -50,7 +51,8 @@ const GameOverModal: React.FC<NavProps> = ({navigation}) => {
     }
   };
 
-  const playAgain = async () => {
+  const playAgainKeyboard = async () => {
+    setIsDoneKeyboardPressed(true);
     const updatedLeaderboard = [...leaderboard, {name, score}];
     updatedLeaderboard.sort((a, b) => b.score - a.score);
     const top10Leaderboard = updatedLeaderboard.slice(0, 10); // Limit to top 10
@@ -68,7 +70,32 @@ const GameOverModal: React.FC<NavProps> = ({navigation}) => {
     dispatch(addLeaderboardEntry({name, score}));
     dispatch(resetGame());
     Keyboard.dismiss();
-    navigation.navigate('HomeScreen');
+  };
+
+  const playAgain = async () => {
+    if (isDoneKeyboardPressed) {
+      setIsDoneKeyboardPressed(false);
+      navigation.navigate('HomeScreen');
+    } else {
+      const updatedLeaderboard = [...leaderboard, {name, score}];
+      updatedLeaderboard.sort((a, b) => b.score - a.score);
+      const top10Leaderboard = updatedLeaderboard.slice(0, 10); // Limit to top 10
+
+      try {
+        await AsyncStorage.setItem(
+          'leaderboard',
+          JSON.stringify(top10Leaderboard),
+        );
+        setLeaderboard(top10Leaderboard);
+      } catch (error) {
+        console.log('Error saving leaderboard:', error);
+      }
+
+      dispatch(addLeaderboardEntry({name, score}));
+      dispatch(resetGame());
+      Keyboard.dismiss();
+      navigation.navigate('HomeScreen');
+    }
   };
 
   return (
@@ -88,6 +115,7 @@ const GameOverModal: React.FC<NavProps> = ({navigation}) => {
             placeholder="Enter your name"
             value={name}
             onChangeText={setName}
+            onSubmitEditing={playAgainKeyboard}
           />
 
           <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
