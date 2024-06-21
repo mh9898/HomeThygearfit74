@@ -52,7 +52,6 @@ const GameOverModal: React.FC<NavProps> = ({navigation}) => {
   };
 
   const playAgainKeyboard = async () => {
-    setIsDoneKeyboardPressed(true);
     const updatedLeaderboard = [...leaderboard, {name, score}];
     updatedLeaderboard.sort((a, b) => b.score - a.score);
     const top10Leaderboard = updatedLeaderboard.slice(0, 10); // Limit to top 10
@@ -70,11 +69,13 @@ const GameOverModal: React.FC<NavProps> = ({navigation}) => {
     dispatch(addLeaderboardEntry({name, score}));
     dispatch(resetGame());
     Keyboard.dismiss();
+    setName('');
+    setIsDoneKeyboardPressed(true);
   };
 
   const playAgain = async () => {
     if (isDoneKeyboardPressed) {
-      setIsDoneKeyboardPressed(false);
+      // setIsDoneKeyboardPressed(false);
       navigation.navigate('HomeScreen');
     } else {
       const updatedLeaderboard = [...leaderboard, {name, score}];
@@ -109,14 +110,18 @@ const GameOverModal: React.FC<NavProps> = ({navigation}) => {
         }}>
         <View style={styles.container}>
           <Text style={styles.title}>Game Over</Text>
-          <Text style={styles.title}>Your Score: {score}</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your name"
-            value={name}
-            onChangeText={setName}
-            onSubmitEditing={playAgainKeyboard}
-          />
+          {!isDoneKeyboardPressed && (
+            <Text style={styles.title}>Your Score: {score}</Text>
+          )}
+          {!isDoneKeyboardPressed && (
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your name"
+              value={name}
+              onChangeText={setName}
+              onSubmitEditing={playAgainKeyboard}
+            />
+          )}
 
           <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
             <TouchableOpacity
@@ -139,13 +144,19 @@ const GameOverModal: React.FC<NavProps> = ({navigation}) => {
           )}
           ListHeaderComponent={
             <View style={styles.leaderboardHeader}>
-              <View style={styles.leaderboardHeaderCurrentPlayer}>
-                {name.length > 0 && (
-                  <Text style={styles.leaderboardText}> Name: {name}</Text>
-                )}
-                <Text style={styles.leaderboardText}> Your Score: {score}</Text>
-              </View>
-              <Text style={styles.leaderBoardHeaderTextTitle}>Top 10's</Text>
+              {isDoneKeyboardPressed ? (
+                <Text style={styles.leaderBoardHeaderTextTitle}>Top 10's</Text>
+              ) : (
+                <View style={styles.leaderboardHeaderCurrentPlayer}>
+                  {name.length > 0 && (
+                    <Text style={styles.leaderboardText}> Name: {name}</Text>
+                  )}
+                  <Text style={styles.leaderboardText}>
+                    {' '}
+                    Your Score: {score}
+                  </Text>
+                </View>
+              )}
             </View>
           }
         />
