@@ -1,5 +1,6 @@
 import React, {forwardRef} from 'react';
 import {TouchableOpacity, StyleSheet, Text, ViewStyle} from 'react-native';
+import {COLORSBUTTONS} from '../utils/ColorsButtons';
 
 type GameBtnProps = {
   color: string;
@@ -10,10 +11,10 @@ type GameBtnProps = {
 const GameBtn = forwardRef<TouchableOpacity, GameBtnProps>(
   ({color, onPress, style}, ref) => {
     const backgroundColor = {
-      green: '#22c55e',
-      red: '#ef4444',
-      yellow: '#facc15',
-      blue: '#3b82f6',
+      green: COLORSBUTTONS.green, //'#22c55e',
+      red: COLORSBUTTONS.red, //'#ef4444',
+      yellow: COLORSBUTTONS.yellow, //'#f59e0b',
+      blue: COLORSBUTTONS.blue, //'#3b82f6',
     }[color];
 
     return (

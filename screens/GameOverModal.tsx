@@ -78,16 +78,9 @@ const GameOverModal: React.FC<NavProps> = ({navigation}) => {
         transparent={true}
         visible={true}
         onRequestClose={() => {
-          Alert.alert('Modal has been closed.');
           setModalVisible(!modalVisible);
         }}>
-        <View
-          style={{
-            backgroundColor: '#2c3e50',
-            padding: 10,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
+        <View style={styles.container}>
           <Text style={styles.title}>Game Over</Text>
           <Text style={styles.title}>Your Score: {score}</Text>
           <TextInput
@@ -98,8 +91,10 @@ const GameOverModal: React.FC<NavProps> = ({navigation}) => {
           />
 
           <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
-            <TouchableOpacity style={styles.button} onPress={playAgain}>
-              <Text style={styles.buttonText}>Play again</Text>
+            <TouchableOpacity
+              style={styles.buttonPlayAgain}
+              onPress={playAgain}>
+              <Text style={styles.buttonTextPlayAgain}>Play again</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -115,25 +110,14 @@ const GameOverModal: React.FC<NavProps> = ({navigation}) => {
             </View>
           )}
           ListHeaderComponent={
-            <View
-              style={{
-                backgroundColor: '#935438',
-                padding: 10,
-              }}>
-              <Text style={styles.leaderboardTextTitle}>Top 10's</Text>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-around',
-                }}>
+            <View style={styles.leaderboardHeader}>
+              <View style={styles.leaderboardHeaderCurrentPlayer}>
                 {name.length > 0 && (
-                  <Text style={styles.leaderboardText}>
-                    {' '}
-                    Player Name: {name}
-                  </Text>
+                  <Text style={styles.leaderboardText}> Name: {name}</Text>
                 )}
-                <Text style={styles.leaderboardText}> Score: {score}</Text>
+                <Text style={styles.leaderboardText}> Your Score: {score}</Text>
               </View>
+              <Text style={styles.leaderBoardHeaderTextTitle}>Top 10's</Text>
             </View>
           }
         />
@@ -144,11 +128,10 @@ const GameOverModal: React.FC<NavProps> = ({navigation}) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    paddingTop: 30,
+    backgroundColor: '#2c3e50',
+    padding: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#1f2937',
   },
   title: {
     fontSize: 24,
@@ -165,7 +148,7 @@ const styles = StyleSheet.create({
     width: '80%',
     marginBottom: 20,
   },
-  button: {
+  buttonPlayAgain: {
     backgroundColor: '#111827',
     borderRadius: 5,
     padding: 20,
@@ -173,7 +156,31 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 20,
   },
-  buttonText: {
+  buttonTextPlayAgain: {
+    color: 'white',
+    fontSize: 16,
+  },
+  leaderboardHeader: {
+    backgroundColor: '#935438',
+    padding: 10,
+  },
+  leaderboardHeaderCurrentPlayer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    borderColor: 'white',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    margin: 10,
+  },
+  leaderBoardHeaderTextTitle: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  leaderboardText: {
+    textAlign: 'center',
     color: 'white',
     fontSize: 16,
   },
@@ -186,16 +193,6 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     marginHorizontal: 16,
     borderRadius: 10,
-  },
-  leaderboardTextTitle: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  leaderboardText: {
-    textAlign: 'center',
-    color: 'white',
-    fontSize: 16,
   },
 });
 
